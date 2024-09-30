@@ -193,7 +193,7 @@
                 (procedimiento (evaluar-expresion exp amb)))  
               (if (procVal? procedimiento)                  
                   (apply-cerradura procedimiento params)   
-                  (eopl:error 'procVal "No binding for ~s" procedimiento))))
+                  (eopl:error 'evaluar-expresion "Intento de aplicar un enfoque no proedimental ~s" procedimiento))))
         (recursion-exp (noms-procss idss bodies body-recur)
           (evaluar-expresion body-recur 
               (extend-env-recursive noms-procss idss bodies amb)))                     
