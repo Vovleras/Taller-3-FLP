@@ -41,7 +41,7 @@
   (identificador
     ("@" letter (arbno (or letter digit ))) symbol)
   (texto
-    (letter (arbno (or letter digit)) "_" letter (arbno (or letter digit))) string)
+    (letter (arbno (or letter digit "_"))) string)
   (numero
     (digit (arbno digit)) number)
   (numero
@@ -63,7 +63,9 @@
     (expresion ( primitiva-unaria "(" expresion ")" ) primapp-un-exp)
     (expresion ("(" expresion primitiva-binaria expresion ")" ) primapp-bin-exp)
     (expresion ("Si" expresion "{" expresion "}" "sino" "{" expresion "}") condicional-exp)
-    ;(expresion ( "procedimiento" "(" (separated-list identificador "," ) ")" "{" expresion "}") procedimiento-ex) 
+    (expresion ("declarar" "(" (arbno identificador "=" expresion ";" ) ")" "{" expresion "}" ) variableLocal-exp)
+    (expresion ( "procedimiento" "(" (separated-list identificador "," ) ")" "{" expresion "}") procedimiento-ex) 
+    (expresion ("evaluar" expresion "(" (separated-list expresion ",") ")" "finEval" )app-exp)
     
     (primitiva-binaria ("+") primitiva-suma)
     (primitiva-binaria ("~") primitiva-resta)
@@ -135,6 +137,20 @@
   (extend-env '(@a @b @c @d @e) '(1 2 3 "hola" "FLP")
   (empty-env)))
 
+;; DATATYPE PROCEDIMIENTO
+
+(define-datatype procVal procVal?
+  (cerradura  (lista-ID (list-of symbol?))
+              (exp expresion?)
+              (amb environment?)
+  ))
+
+(define apply-cerradura
+  (lambda(proc operadores)
+    (cases procVal proc
+      (cerradura (ids exp amb)
+        (evaluar-expresion exp (extend-env ids operadores amb))))))
+
 ;Función que evalúa un programa teniendo en cuenta un ambiente dado (se inicializa dentro del programa)
 (define evaluar-pgm
   (lambda (exp)
@@ -158,7 +174,21 @@
                     (if (determinar-if? (evaluar-expresion test-exp amb))
                         (evaluar-expresion true-exp amb)
                         (evaluar-expresion false-exp amb)))
-                      
+        (variableLocal-exp (ids exps cuerpo)
+          (let ((args (evaluar-operadores exps amb))) 
+              (evaluar-expresion cuerpo (extend-env ids args amb))))
+        (procedimiento-ex (ids cuerpo)
+          (cerradura ids cuerpo amb))
+        (app-exp (exp exps)
+          (let ((params (evaluar-operadores exps amb))    
+                (procedimiento (evaluar-expresion exp amb)))  
+              (if (procVal? procedimiento)                  
+                  (apply-cerradura procedimiento params)   
+                  (eopl:error 'procVal "No binding for ~s" procedimiento)))) 
+
+            
+
+                        
     )
   )
 )
@@ -218,6 +248,12 @@
 (define negar-arg
   (lambda(arg)
     (if (equal? arg 1) #f #t)))
+
+;Funcion que evalua una lista de expresiones
+
+(define evaluar-operadores
+  (lambda(args env)
+    (map (lambda(x) (evaluar-expresion x env))args)))
 
 ;Función que busca un símbolo en un ambiente
 (define buscar-variable
