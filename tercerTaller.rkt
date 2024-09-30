@@ -25,8 +25,8 @@
 ;;                      <proc-exp (ids body)>
 ;;                  ::= (<expression> {<expression>}*)
 ;;                      <app-exp proc rands>
-;;                  ::= letrec  {identifier ({identifier}*(,)) = <expression>}* in <expression>
-;;                     <letrec-exp proc-names idss bodies bodyletrec>
+;;                  ::= recursion  {identifier ({identifier}*(,)) = <expression>}* en <expression>
+;;                     <recursion-exp proc-namess idss bodies cuerpo-rec>
 ;;  <primitiva-binaria>     ::= + | ~ | / | * | concat | > | < | >= | <= | != | == |
 ;;  <primitiva-unaria>      ::= longitud | add1 | sub1 | neg
 
@@ -66,6 +66,7 @@
     (expresion ("declarar" "(" (arbno identificador "=" expresion ";" ) ")" "{" expresion "}" ) variableLocal-exp)
     (expresion ( "procedimiento" "(" (separated-list identificador "," ) ")" "{" expresion "}") procedimiento-ex) 
     (expresion ("evaluar" expresion "(" (separated-list expresion ",") ")" "finEval" )app-exp)
+    (expresion ("recursion" (arbno "{" identificador "(" (separated-list identificador ",") ")" "=" expresion "}") "en" expresion) recursion-exp)
     
     (primitiva-binaria ("+") primitiva-suma)
     (primitiva-binaria ("~") primitiva-resta)
@@ -115,7 +116,11 @@
   (empty-env-record)
   (extended-env-record (syms (list-of symbol?))
                        (vals (list-of scheme-value?))
-                       (env environment?)))
+                       (env environment?))
+  (recursive-env-extended    (proc-names (list-of symbol?))
+                             (idss (list-of (list-of scheme-value?)))
+                             (bodies (list-of expresion?))
+                             (env environment?)))
 
 (define scheme-value? (lambda (v) #t))
 
@@ -131,6 +136,10 @@
 (define extend-env
   (lambda (syms vals env)
     (extended-env-record syms vals env)))
+
+(define extend-env-recursive
+  (lambda (names-proc idss bodies env)
+    (recursive-env-extended names-proc idss bodies env)))
 
 ; Ambiente inicial
 (define amb-inicial
@@ -184,11 +193,10 @@
                 (procedimiento (evaluar-expresion exp amb)))  
               (if (procVal? procedimiento)                  
                   (apply-cerradura procedimiento params)   
-                  (eopl:error 'procVal "No binding for ~s" procedimiento)))) 
-
-            
-
-                        
+                  (eopl:error 'procVal "No binding for ~s" procedimiento))))
+        (recursion-exp (noms-procss idss bodies body-recur)
+          (evaluar-expresion body-recur 
+              (extend-env-recursive noms-procss idss bodies amb)))                     
     )
   )
 )
@@ -265,7 +273,14 @@
                            (let ((pos (list-find-position sym syms)))
                              (if (number? pos)
                                  (list-ref vals pos)
-                                 (buscar-variable old-env sym)))))))
+                                 (buscar-variable old-env sym))))
+      (recursive-env-extended (proc-names idss bodies old-env)
+                (let ((pos (list-find-position sym proc-names)))
+                    (if (number? pos) 
+                      (cerradura (list-ref idss pos)
+                                  (list-ref bodies pos)
+                                  env)
+                      (buscar-variable old-env sym)))))))
 
 
 ;Funciones Auxiliares
