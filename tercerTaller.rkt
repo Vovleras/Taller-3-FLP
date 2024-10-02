@@ -303,3 +303,17 @@
                 #f))))))
 
 (interpretador)
+
+
+#|Punto A
+recursion
+{@valorEntero(@dividendo, @divisor) = Si (@dividendo < @divisor) { 0 } sino {(1 + evaluar @valorEntero((@dividendo ~  @divisor),@divisor) finEval)}} 
+{@sumarDigitos(@num) = Si (@num < 10) { @num } sino {((@num ~ (evaluar  @valorEntero(@num, 10) finEval * 10)) + evaluar @sumarDigitos(evaluar  @valorEntero(@num, 10) finEval) finEval )}} 
+en evaluar  @sumarDigitos(147) finEval
+|#
+
+#|  PUNTO C 
+recursion 
+{ @potencia(@base, @exp) = Si (@exp == 0) { 1 } sino {(@base * evaluar @potencia(@base, (@exp ~ 1)) finEval)}}
+ en evaluar @potencia(4,2) finEval
+|#
