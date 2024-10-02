@@ -1,5 +1,9 @@
 #lang eopl
-
+#| 
+Sheila Marcela Valencia Chito - 2243011
+Victoria Andrea Volveras Parra - 2241874
+ |#
+ 
 ;; Interpretador para tercer taller
 
 ;; La definición BNF para las expresiones del lenguaje:
@@ -11,22 +15,21 @@
 ;;                  ::= "\"" <texto> "\""
 ;;                      <texto-lit (num)>
 ;;                  ::= <identificador>
-;;                      var-exp (id)
+;;                      <var-exp (id)>
 ;;                  ::= (<expresion> <primitiva-binaria> <expresion>)
-;;                      primapp-bin-exp (exp1 prim-binaria exp2)
+;;                      <primapp-bin-exp (exp1 prim-binaria exp2)>
 ;;                  ::= <primitiva-unaria> (<expresion>)
-;;                      primapp-un-exp (prim-unaria exp)
-;;                  REVISAR
-;;                  ::= if <expresion> then <expresion> else <expression>
-;;                      <if-exp (exp1 exp2 exp23)>
-;;                  ::= let {identifier = <expression>}* in <expression>
-;;                      <let-exp (ids rands body)>
-;;                  ::= proc({<identificador>}*(,)) <expression>
-;;                      <proc-exp (ids body)>
-;;                  ::= (<expression> {<expression>}*)
-;;                      <app-exp proc rands>
-;;                  ::= recursion  {identifier ({identifier}*(,)) = <expression>}* en <expression>
-;;                     <recursion-exp proc-namess idss bodies cuerpo-rec>
+;;                      <primapp-un-exp (prim-unaria exp)>
+;;                  ::= Si <expresion> "{" <expresion>  "}" "sino" "{" <expresion> "}"
+;;                      <condicional-exp (test-exp true-exp false-exp)>
+;;                  ::= declarar ({<identificador> = <expresion> ';' }*)) { <expresion> }
+;;                      <variableLocal-exp (ids exps cuerpo)>
+;;                  ::= procedimiento (<identificador>*(',') ) "{" <expresion> "}"
+;;                      <procedimiento-exp (ids cuero)>
+;;                  ::= "evaluar" expresion   (expresion *(",") )  finEval
+;;                      <app-exp(exp exps)>
+;;                  ::= recursion  {identificador ({identificador}*(,)) = <expression>}* en <expression>
+;;                      <recursion-exp (proc-namess idss bodies cuerpo-rec)>
 ;;  <primitiva-binaria>     ::= + | ~ | / | * | concat | > | < | >= | <= | != | == |
 ;;  <primitiva-unaria>      ::= longitud | add1 | sub1 | neg
 
@@ -41,7 +44,7 @@
   (identificador
     ("@" letter (arbno (or letter digit ))) symbol)
   (texto
-    (letter (arbno (or letter digit "_"))) string)
+    ((or letter "_" ) (arbno (or letter digit "_" ":"))) string)
   (numero
     (digit (arbno digit)) number)
   (numero
@@ -64,7 +67,7 @@
     (expresion ("(" expresion primitiva-binaria expresion ")" ) primapp-bin-exp)
     (expresion ("Si" expresion "{" expresion "}" "sino" "{" expresion "}") condicional-exp)
     (expresion ("declarar" "(" (arbno identificador "=" expresion ";" ) ")" "{" expresion "}" ) variableLocal-exp)
-    (expresion ( "procedimiento" "(" (separated-list identificador "," ) ")" "{" expresion "}") procedimiento-ex) 
+    (expresion ( "procedimiento" "(" (separated-list identificador "," ) ")" "{" expresion "}") procedimiento-exp) 
     (expresion ("evaluar" expresion "(" (separated-list expresion ",") ")" "finEval" )app-exp)
     (expresion ("recursion" (arbno "{" identificador "(" (separated-list identificador ",") ")" "=" expresion "}") "en" expresion) recursion-exp)
     
@@ -146,13 +149,15 @@
   (extend-env '(@a @b @c @d @e) '(1 2 3 "hola" "FLP")
   (empty-env)))
 
-;; DATATYPE PROCEDIMIENTO
+; DATATYPE PROCEDIMIENTO
 
 (define-datatype procVal procVal?
   (cerradura  (lista-ID (list-of symbol?))
               (exp expresion?)
               (amb environment?)
   ))
+
+; Funcion que evalua una cerradura
 
 (define apply-cerradura
   (lambda(proc operadores)
@@ -186,7 +191,7 @@
         (variableLocal-exp (ids exps cuerpo)
           (let ((args (evaluar-operadores exps amb))) 
               (evaluar-expresion cuerpo (extend-env ids args amb))))
-        (procedimiento-ex (ids cuerpo)
+        (procedimiento-exp (ids cuerpo)
           (cerradura ids cuerpo amb))
         (app-exp (exp exps)
           (let ((params (evaluar-operadores exps amb))    
@@ -303,3 +308,55 @@
                 #f))))))
 
 (interpretador)
+
+
+
+#| 
+
+PUNTO B
+
+recursion { @fact (@x) = Si @x {(@x * evaluar @fact (sub1(@x)) finEval) } sino {1} }
+          en
+           evaluar @fact (5) finEval
+
+
+recursion { @fact (@x) = Si @x {(@x * evaluar @fact (sub1(@x)) finEval) } sino {1} } 
+          en 
+            evaluar @fact (10) finEval
+
+PUNTO D
+
+recursion { @sumaRango (@a,@b) = Si (@a > @b) {0} sino {(@a + evaluar @sumaRango ((@a + 1) , @b) finEval)} } 
+          en
+            evaluar @sumaRango (2 , 5) finEval
+
+PUNTO E
+
+  recursion { @integrantes () = "Robinson_y_Sara"}
+            { @saludar (@proc) = procedimiento () { ("Hola:" concat evaluar @proc () finEval)}}
+
+            en
+              declarar (
+                          @decorate = evaluar @saludar (@integrantes) finEval;
+                        )
+                        {
+                          evaluar @decorate () finEval
+                        } 
+
+
+  PUNTO F             
+  recursion { @integrantes () = "Robinson_y_Sara"}
+             { @saludar (@proc) = procedimiento (@arg) { ("Hola:" concat ( evaluar @proc () finEval concat @arg ) )}}
+
+             en
+                declarar (
+                            @decorate = evaluar @saludar (@integrantes) finEval;
+                          )
+                          {
+                            evaluar @decorate ("_ProfesoresFLP") finEval 
+                          }                  
+                        
+                        |#
+
+
+
