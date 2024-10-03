@@ -320,11 +320,6 @@ recursion {@valorEntero(@dividendo, @divisor) = Si (@dividendo < @divisor) { 0 }
           en 
            evaluar  @sumarDigitos(147) finEval
 
-PUNTO C 
-recursion { @potencia(@base, @exp) = Si (@exp == 0) { 1 } sino {(@base * evaluar @potencia(@base, (@exp ~ 1)) finEval)}}
-          en 
-            evaluar @potencia(4,2) finEval
-
 PUNTO B
 
 recursion { @fact (@x) = Si @x {(@x * evaluar @fact (sub1(@x)) finEval) } sino {1} }
@@ -336,6 +331,11 @@ recursion { @fact (@x) = Si @x {(@x * evaluar @fact (sub1(@x)) finEval) } sino {
           en 
             evaluar @fact (10) finEval
 
+PUNTO C 
+recursion { @potencia(@base, @exp) = Si (@exp == 0) { 1 } sino {(@base * evaluar @potencia(@base, (@exp ~ 1)) finEval)}}
+          en 
+            evaluar @potencia(4,2) finEval
+
 PUNTO D
 
 recursion { @sumaRango (@a,@b) = Si (@a > @b) {0} sino {(@a + evaluar @sumaRango ((@a + 1) , @b) finEval)} } 
@@ -344,7 +344,7 @@ recursion { @sumaRango (@a,@b) = Si (@a > @b) {0} sino {(@a + evaluar @sumaRango
 
 PUNTO E
 
-  recursion { @integrantes () = "Robinson_y_Sara"}
+  recursion { @integrantes () = "Victoria_y_Sheila"}
             { @saludar (@proc) = procedimiento () { ("Hola:" concat evaluar @proc () finEval)}}
 
             en
@@ -357,17 +357,15 @@ PUNTO E
 
 
   PUNTO F             
-  recursion { @integrantes () = "Robinson_y_Sara"}
-             { @saludar (@proc) = procedimiento (@arg) { ("Hola:" concat ( evaluar @proc () finEval concat @arg ) )}}
+  recursion { @integrantes () = "Victoria_y_Sheila"}
+             { @saludar (@proc) = procedimiento () { ("Hola:" concat  evaluar @proc () finEval )}}
 
              en
                 declarar (
-                            @decorate = evaluar @saludar (@integrantes) finEval;
+                            @decorate = procedimiento (@arg) {(evaluar evaluar @saludar (@integrantes) finEval () finEval concat @arg)};
                           )
                           {
                             evaluar @decorate ("_ProfesoresFLP") finEval 
                           }                  
                         
-                        |#
-
-
+|#
