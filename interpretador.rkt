@@ -207,7 +207,7 @@ github: https://github.com/Vovleras/Taller-3-FLP
   )
 )
 
-;Aplicar operación binaria
+;Procedimiento que permite realizar una operacion binaria entre arg1 y arg2
 (define apply-bin-exp
   (lambda (pim-bin arg1 arg2)
     (cases primitiva-binaria pim-bin
@@ -226,7 +226,7 @@ github: https://github.com/Vovleras/Taller-3-FLP
   )
 )
 
-;Aplicar operación unaria
+;Procedimiento que le aplica una operacion a un argumento arg
 (define apply-un-exp
   (lambda (prim-un arg)
     (cases primitiva-unaria prim-un
@@ -238,7 +238,7 @@ github: https://github.com/Vovleras/Taller-3-FLP
   )
 )
 
-;Evaluar valor de verdad
+;Procedimiento que permite evaluar el valor de verdad de una expresion, en caso de ser verdad retorna 1, en caso contrario 0
 (define valor-verdad?
   (lambda(pim arg1 arg2)
     (if (pim arg1 arg2) 1 0)))
@@ -248,28 +248,28 @@ github: https://github.com/Vovleras/Taller-3-FLP
   (lambda (x)
     (not (zero? x))))
 
-;Funcion que permite evaluar la desigualdad
+;Procedimiento que permite evaluar la desigualdad entre dos argumentos, si son iguales retorna 0 falso y en caso contrario 1 verdadero
 (define desigualdad?
   (lambda(arg1 arg2)
     (if (equal? arg1 arg2) 0 1)))
 
-;Funcion que permite evaluar la longitud de un elemento
+;Procedimiento que permite evaluar la longitud de un elemento
 (define saber-longitud
   (lambda(arg)
     (if (string? arg) (string-length arg) (length arg))))
 
-;Funcion para obtener la negación booleana
+;Procedimiento para obtener la negación booleana de una expresion arg
 (define negar-arg
   (lambda(arg)
     (if (equal? arg 1) #f #t)))
 
-;Funcion que evalua una lista de expresiones
+;Procedimiento que evalua una lista de expresiones
 
 (define evaluar-operadores
   (lambda(args env)
     (map (lambda(x) (evaluar-expresion x env))args)))
 
-;Función que busca un símbolo en un ambiente
+;Procedimiento que busca un símbolo en un ambiente
 (define buscar-variable
   (lambda (env sym)
     (cases environment env
@@ -292,7 +292,7 @@ github: https://github.com/Vovleras/Taller-3-FLP
 ;Funciones Auxiliares
 
 ; funciones auxiliares para encontrar la posición de un símbolo
-; en la lista de símbolos de unambiente
+; en la lista de símbolos de un ambiente
 
 (define list-find-position
   (lambda (sym los)
